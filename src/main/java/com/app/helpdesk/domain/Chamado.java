@@ -12,7 +12,6 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "TB_CHAMADO")
@@ -52,4 +51,13 @@ public class Chamado implements Serializable {
     @JoinColumn(name = "CLIENTE_ID", referencedColumnName = "ID")
     private Cliente cliente;
 
+    public Chamado(Integer id, Prioridade prioridade, Status status, String titulo, String observacoes, Tecnico tecnico, Cliente cliente) {
+        this.id = id;
+        this.prioridade = prioridade;
+        this.status = status;
+        this.titulo = titulo;
+        this.observacoes = observacoes;
+        this.tecnico = tecnico;
+        this.cliente = cliente;
+    }
 }
