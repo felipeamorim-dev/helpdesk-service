@@ -8,6 +8,7 @@ import com.app.helpdesk.domain.enums.Prioridade;
 import com.app.helpdesk.domain.enums.Status;
 import com.app.helpdesk.repositories.ChamadoRepository;
 import com.app.helpdesk.repositories.PessoaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -15,8 +16,10 @@ import java.util.Arrays;
 @Service
 public class DBService {
 
+    @Autowired
     private ChamadoRepository chamadoRepository;
 
+    @Autowired
     private PessoaRepository pessoaRepository;
 
     public void instanciaDB(){
