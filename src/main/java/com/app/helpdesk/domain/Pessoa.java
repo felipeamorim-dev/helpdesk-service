@@ -62,4 +62,8 @@ public abstract class Pessoa implements Serializable {
     public void addPerfil(Perfil perfil){
         this.perfis.add(perfil.getCodigo());
     }
+
+    public void addPerfis(Set<Perfil> perfis) {
+        perfis.forEach(perfil -> this.perfis.add(perfil.getCodigo()));
+    }
 }

@@ -1,11 +1,14 @@
 package com.app.helpdesk.services;
 
 import com.app.helpdesk.domain.Cliente;
+import com.app.helpdesk.domain.Dto.ClienteDTO;
 import com.app.helpdesk.domain.Pessoa;
+import com.app.helpdesk.domain.enums.Perfil;
 import com.app.helpdesk.exceptions.DataIntegrityViolationException;
 import com.app.helpdesk.exceptions.ObjectNotFoundException;
 import com.app.helpdesk.repositories.ClienteRepository;
 import com.app.helpdesk.repositories.PessoaRepository;
+import com.app.helpdesk.util.MapperUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ClienteService implements DefaultService<Cliente> {
+public class ClienteService implements DefaultService<Cliente, ClienteDTO> {
 
     @Autowired
     private ClienteRepository clienteRepository;
@@ -25,6 +28,9 @@ public class ClienteService implements DefaultService<Cliente> {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private MapperUtil mapperUtil;
+
     @Override
     public Cliente findById(Integer id) {
         return clienteRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Objeto não encontrado! ID: " + id));
@@ -32,7 +38,8 @@ public class ClienteService implements DefaultService<Cliente> {
 
     @Override
     public Cliente create(Cliente entity) {
-        validaPorCpfEEmail(entity);
+        entity.addPerfil(Perfil.CLIENTE);
+        //validaPorCpfEEmail(entity);
         return clienteRepository.save(entity);
     }
 
@@ -42,10 +49,11 @@ public class ClienteService implements DefaultService<Cliente> {
     }
 
     @Override
-    public Cliente update(Integer id, Cliente entity) {
+    public Cliente update(Integer id, ClienteDTO entity) {
+        entity.setId(id);
         Cliente obj = findById(id);
         validaPorCpfEEmail(entity);
-        modelMapper.map(entity, obj);
+        obj = mapperUtil.dtoForEntity(entity);
         return clienteRepository.save(obj);
     }
 
@@ -59,13 +67,13 @@ public class ClienteService implements DefaultService<Cliente> {
         clienteRepository.deleteById(id);
     }
 
-    private void validaPorCpfEEmail(Cliente cliente) {
-        Optional<Pessoa> obj = pessoaRepository.findByCpf(cliente.getCpf());
-        if (obj.isPresent() && obj.get().getId() != cliente.getId())
+    private void validaPorCpfEEmail(ClienteDTO clienteDto) {
+        Optional<Pessoa> obj = pessoaRepository.findByCpf(clienteDto.getCpf());
+        if (obj.isPresent() && obj.get().getId() != clienteDto.getId())
             throw new DataIntegrityViolationException("CPF já cadastrado no sistema!");
 
-        obj = pessoaRepository.findByEmail(cliente.getEmail());
-        if (obj.isPresent() && obj.get().getId() != cliente.getId())
+        obj = pessoaRepository.findByEmail(clienteDto.getEmail());
+        if (obj.isPresent() && obj.get().getId() != clienteDto.getId())
             throw new DataIntegrityViolationException("E-mail já cadastrado no sistema!");
     }
 }
