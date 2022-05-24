@@ -55,7 +55,7 @@ public class TecnicoController {
     }
 
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity<Void> delete(Integer id) {
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
         tecnicoService.delete(id);
         return ResponseEntity.noContent().build();
     }
