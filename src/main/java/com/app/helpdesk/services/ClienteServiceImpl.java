@@ -8,7 +8,6 @@ import com.app.helpdesk.exceptions.DataIntegrityViolationException;
 import com.app.helpdesk.exceptions.ObjectNotFoundException;
 import com.app.helpdesk.repositories.ClienteRepository;
 import com.app.helpdesk.repositories.PessoaRepository;
-import com.app.helpdesk.util.MapperUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ClienteService implements DefaultService<Cliente, ClienteDTO> {
+public class ClienteServiceImpl implements DefaultService<Cliente, ClienteDTO> {
 
     @Autowired
     private ClienteRepository clienteRepository;
@@ -28,19 +27,17 @@ public class ClienteService implements DefaultService<Cliente, ClienteDTO> {
     @Autowired
     private ModelMapper modelMapper;
 
-    @Autowired
-    private MapperUtil mapperUtil;
-
     @Override
     public Cliente findById(Integer id) {
         return clienteRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Objeto não encontrado! ID: " + id));
     }
 
     @Override
-    public Cliente create(Cliente entity) {
-        entity.addPerfil(Perfil.CLIENTE);
-        //validaPorCpfEEmail(entity);
-        return clienteRepository.save(entity);
+    public Cliente create(ClienteDTO entityDto) {
+        validaPorCpfEEmail(entityDto);
+        Cliente cliente = modelMapper.map(entityDto, Cliente.class);
+        cliente.addPerfil(Perfil.CLIENTE);
+        return clienteRepository.save(cliente);
     }
 
     @Override
@@ -49,12 +46,12 @@ public class ClienteService implements DefaultService<Cliente, ClienteDTO> {
     }
 
     @Override
-    public Cliente update(Integer id, ClienteDTO entity) {
-        entity.setId(id);
-        Cliente obj = findById(id);
-        validaPorCpfEEmail(entity);
-        obj = mapperUtil.dtoForEntity(entity);
-        return clienteRepository.save(obj);
+    public Cliente update(Integer id, ClienteDTO entityDto) {
+        entityDto.setId(id);
+        Cliente clienteAtualizado = findById(id);
+        validaPorCpfEEmail(entityDto);
+        modelMapper.map(modelMapper.map(entityDto, Cliente.class), clienteAtualizado);
+        return clienteRepository.save(clienteAtualizado);
     }
 
     @Override
