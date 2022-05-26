@@ -10,6 +10,7 @@ import com.app.helpdesk.repositories.ClienteRepository;
 import com.app.helpdesk.repositories.PessoaRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +28,9 @@ public class ClienteServiceImpl implements DefaultService<Cliente, ClienteDTO> {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private BCryptPasswordEncoder encoder;
+
     @Override
     public Cliente findById(Integer id) {
         return clienteRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Objeto não encontrado! ID: " + id));
@@ -34,6 +38,7 @@ public class ClienteServiceImpl implements DefaultService<Cliente, ClienteDTO> {
 
     @Override
     public Cliente create(ClienteDTO entityDto) {
+        entityDto.setSenha(encoder.encode(entityDto.getSenha()));
         validaPorCpfEEmail(entityDto);
         Cliente cliente = modelMapper.map(entityDto, Cliente.class);
         cliente.addPerfil(Perfil.CLIENTE);
@@ -49,6 +54,10 @@ public class ClienteServiceImpl implements DefaultService<Cliente, ClienteDTO> {
     public Cliente update(Integer id, ClienteDTO entityDto) {
         entityDto.setId(id);
         Cliente clienteAtualizado = findById(id);
+
+        //Encode da senha atualizada
+        if(!entityDto.getSenha().equals(clienteAtualizado.getSenha())) entityDto.setSenha(encoder.encode(entityDto.getSenha()));
+
         validaPorCpfEEmail(entityDto);
         modelMapper.map(modelMapper.map(entityDto, Cliente.class), clienteAtualizado);
         return clienteRepository.save(clienteAtualizado);

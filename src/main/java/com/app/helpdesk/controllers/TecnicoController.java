@@ -9,6 +9,7 @@ import com.app.helpdesk.services.TecnicoServiceImpl;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -41,6 +42,7 @@ public class TecnicoController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<ClienteDTO> create(@Valid @RequestBody TecnicoDTO obj){
         Tecnico newTecnico = tecnicoService.create(obj);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newTecnico.getId()).toUri();
@@ -48,6 +50,7 @@ public class TecnicoController {
     }
 
     @PutMapping(path = "/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<TecnicoDTO> update(@PathVariable Integer id, @Valid @RequestBody TecnicoDTO obj){
         obj.setId(null);
         Tecnico tecnicoAtualizado = tecnicoService.update(id, obj);
@@ -55,6 +58,7 @@ public class TecnicoController {
     }
 
     @DeleteMapping(path = "/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         tecnicoService.delete(id);
         return ResponseEntity.noContent().build();

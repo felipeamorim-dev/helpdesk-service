@@ -13,6 +13,7 @@ import com.app.helpdesk.repositories.PessoaRepository;
 import com.app.helpdesk.repositories.TecnicoRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,6 +31,9 @@ public class TecnicoServiceImpl implements DefaultService<Tecnico, TecnicoDTO> {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private BCryptPasswordEncoder encoder;
+
     @Override
     public Tecnico findById(Integer id) {
         return tecnicoRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Objeto não encontrado! ID: " + id));
@@ -37,6 +41,7 @@ public class TecnicoServiceImpl implements DefaultService<Tecnico, TecnicoDTO> {
 
     @Override
     public Tecnico create(TecnicoDTO entityDto) {
+        entityDto.setSenha(encoder.encode(entityDto.getSenha()));
         validaPorCpfEEmail(entityDto);
         Tecnico tecnico = modelMapper.map(entityDto, Tecnico.class);
         tecnico.addPerfil(Perfil.TECNICO);
@@ -52,6 +57,10 @@ public class TecnicoServiceImpl implements DefaultService<Tecnico, TecnicoDTO> {
     public Tecnico update(Integer id, TecnicoDTO entityDto) {
         entityDto.setId(id);
         Tecnico tecnicoAtualizado = findById(id);
+
+        //Encode da senha atualizada
+        if(!entityDto.getSenha().equals(tecnicoAtualizado.getSenha())) entityDto.setSenha(encoder.encode(entityDto.getSenha()));
+
         validaPorCpfEEmail(entityDto);
         modelMapper.map(modelMapper.map(entityDto, Tecnico.class), tecnicoAtualizado);
         return tecnicoRepository.save(tecnicoAtualizado);
